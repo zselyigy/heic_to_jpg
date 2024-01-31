@@ -9,6 +9,7 @@ from tkinter import filedialog
 
 def gui():
     global label
+    global recc, delc, zipc
     #Set the theme and color options
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("dark-blue")
@@ -22,6 +23,14 @@ def gui():
     
     fb = ctk.CTkButton(master=root, text="Choose file", command=get_file).pack()
     db = ctk.CTkButton(master=root, text="Choose directory", command=get_directory).pack()
+    fsb = ctk.CTkButton(master=root, text="Choose files", command=get_files).pack()
+    convfb = ctk.CTkButton(master=root, text="Convert files/directory", command=conversion).pack()
+    recc = ctk.CTkCheckBox(master=root, text="Run in all subdirectories?", onvalue=True, offvalue=False)
+    delc = ctk.CTkCheckBox(master=root, text="Delete processed HEIC files?", onvalue=True, offvalue=False)
+    zipc = ctk.CTkCheckBox(master=root, text="Zip processed HEIC files?", onvalue=True, offvalue=False)
+    recc.pack()
+    delc.pack()
+    zipc.pack()
     label = ctk.CTkLabel(root, text="File or directory path will appear here.")
     label.pack()
     root.mainloop()
@@ -52,24 +61,27 @@ def convert_rec(directorylist):
                 except:
                     print(f"Error converting {filename}")
 
-            # Select the compression mode ZIP_DEFLATED for compression
-            # or zipfile.ZIP_STORED to just store the file
-            compression = zip.ZIP_DEFLATED
-            print(f"{directory}/HEIC.zip")
-            zf = zip.ZipFile(f"{directory}/HEIC.zip", mode="w")
+            if zipc.get() == 1:
+                # Select the compression mode ZIP_DEFLATED for compression
+                # or zipfile.ZIP_STORED to just store the file
+                compression = zip.ZIP_DEFLATED
+                print(f"{directory}/HEIC.zip")
+                zf = zip.ZipFile(f"{directory}/HEIC.zip", mode="w")
 
-            for file_to_write in files:
-                try:
-                    print(f"{directory}/{file_to_write}")
-                    # Add file to the zip file
-                    # first parameter file to zip, second filename in zip
-                    zf.write(f"{directory}/{file_to_write}", file_to_write, compress_type=compression, compresslevel=0)
+                for file_to_write in files:
+                    try:
+                        print(f"{directory}/{file_to_write}")
+                        # Add file to the zip file
+                        # first parameter file to zip, second filename in zip
+                        zf.write(f"{directory}/{file_to_write}", file_to_write, compress_type=compression, compresslevel=0)
+                    except FileNotFoundError as e:
+                        print(f' *** Exception occurred during zip process - {e}')
+                    logging.info(f"{directory} HEIC files zipped")
+                    zf.close()
+            if delc.get() == 1:
+                for file_to_write in files:
                     os.remove(f"{directory}/{file_to_write}")
-
-                except FileNotFoundError as e:
-                    print(f' *** Exception occurred during zip process - {e}')
-            logging.info(f"{directory} HEIC files zipped")
-            zf.close()
+                
 
 def convert(directory):
     files = [f for f in os.listdir(directory) if f.lower().endswith('.heic') or f.lower().endswith('.heif')]
@@ -83,25 +95,27 @@ def convert(directory):
             except:
                 print(f"Error converting {filename}")
 
-        # Select the compression mode ZIP_DEFLATED for compression
-        # or zipfile.ZIP_STORED to just store the file
-        compression = zip.ZIP_DEFLATED
-        print(f"{directory}/HEIC.zip")
-        zf = zip.ZipFile(f"{directory}/HEIC.zip", mode="w")
+        if zipc.get() == 1:
+            # Select the compression mode ZIP_DEFLATED for compression
+            # or zipfile.ZIP_STORED to just store the file
+            compression = zip.ZIP_DEFLATED
+            print(f"{directory}/HEIC.zip")
+            zf = zip.ZipFile(f"{directory}/HEIC.zip", mode="w")
+                
+            for file_to_write in files:
+                try:
+                    print(f"{directory}/{file_to_write}")
+                    # Add file to the zip file
+                    # first parameter file to zip, second filename in zip
+                    zf.write(f"{directory}/{file_to_write}", file_to_write, compress_type=compression, compresslevel=0)
 
-        for file_to_write in files:
-            try:
-                print(f"{directory}/{file_to_write}")
-                # Add file to the zip file
-                # first parameter file to zip, second filename in zip
-                zf.write(f"{directory}/{file_to_write}", file_to_write, compress_type=compression, compresslevel=0)
-                os.remove(f"{directory}/{file_to_write}")
-
-            except FileNotFoundError as e:
-                print(f' *** Exception occurred during zip process - {e}')
-        logging.info(f"{directory} HEIC files zipped")
-        zf.close()
-
+                except FileNotFoundError as e:
+                    print(f' *** Exception occurred during zip process - {e}')
+            logging.info(f"{directory} HEIC files zipped")
+            zf.close()
+        if delc.get() == 1:
+                for file_to_write in files:
+                    os.remove(f"{directory}/{file_to_write}")
 def convert_f(file):
     command = rf'.\.venv\Scripts\heif-convert.exe -o {file[:-5]} -p "{file}" -q 95 "{file}"'
     #
@@ -110,17 +124,18 @@ def convert_f(file):
         logging.info(f"{file} ---> {file[:-5]}.jpg)")
     except:
         print(f"Error converting {file}")
+    if delc.get() == 1:
+        os.remove(f"{file}")
 
 def convert_fs(filelist):
-    for file in filelist:
-        for filename in filelist:
-            command = rf'.\.venv\Scripts\heif-convert.exe -o {filename[:-5]} -p "{os.path.dirname(filename)}" -q 95 "{filename}"'
-            try:
-                subprocess.run(command, shell=True, check=True)
-                logging.info(f"{filename} ---> {filename[:-5]}.jpg")
-            except:
-                print(f"Error converting {filename}")
-
+    for filename in filelist:
+        command = rf'.\.venv\Scripts\heif-convert.exe -o {filename[:-5]} -p "{os.path.dirname(filename)}" -q 95 "{filename}"'
+        try:
+            subprocess.run(command, shell=True, check=True)
+            logging.info(f"{os.path.basename(filename)} ---> {os.path.basename(filename)}.jpg")
+        except:
+            print(f"Error converting {filename}")
+    if zipc.get() == 1:
         # Select the compression mode ZIP_DEFLATED for compression
         # or zipfile.ZIP_STORED to just store the file
         compression = zip.ZIP_DEFLATED
@@ -132,38 +147,60 @@ def convert_fs(filelist):
                 print(f"{file_to_write}")
                 # Add file to the zip file
                 # first parameter file to zip, second filename in zip
-                zf.write(f"{file_to_write}", file_to_write, compress_type=compression, compresslevel=0)
-                os.remove(f"{file_to_write}")
+                zf.write(f"{os.path.basename(file_to_write)}", os.path.basename(file_to_write), compress_type=compression, compresslevel=0)
 
             except FileNotFoundError as e:
                 print(f' *** Exception occurred during zip process - {e}')
         logging.info(f"HEIC files zipped")
         zf.close()
-            
+    for file_obj in file:
+        file_obj.close()
+    if delc.get() == 1:
+        for file_to_write in filelist:
+            os.remove(f"{file_to_write}")
+ 
+
+def conversion():
+    if dirs == "":
+        if type(file) == list:
+            convert_fs([f.name for f in file])
+        else:
+            convert_f(file.name)
+    else:
+        if recc.get() == 1:
+            convert_rec(folders())
+        else:
+            convert(dirs)
+        
 def get_file():
     global file
-    file = filedialog.askopenfile(title="Select a HEIC file")
+    global dirs
+    dirs = ""
+    file = filedialog.askopenfile(title="Select a HEIC file", filetypes=[("HEIC file","*.HEIC")])
     label.configure(text=f"Selected file: {file.name}")
     label.pack()
     
 
 def get_directory():
     global dirs
+    global file
+    file = ""
     dirs = filedialog.askdirectory(title="Select directory")
     label.configure(text=f"Selected directory: {dirs}")
     label.pack()
     
 def get_files():
     global file
-    file = filedialog.askopenfiles(title="Select a HEIC file")
-    label.configure(text=f"Selected files: {file.name}")
+    global dirs
+    dirs = ""
+    file = filedialog.askopenfiles(title="Select a HEIC file", filetypes=[("HEIC file","*.HEIC")])
+    label.configure(text=f"Selected files: {[f.name for f in file]}")
     label.pack()
     
 def main():
-    gui()
     logging.basicConfig(filename="latest.log", level=logging.INFO, filemode='w',format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
-    directorylist = folders(args)
-    convert_rec(directorylist)
+    gui()
+    
 
 if __name__ == "__main__":
     main()
