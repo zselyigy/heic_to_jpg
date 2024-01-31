@@ -13,6 +13,11 @@ def gui():
     
     #Create root object
     root = ctk.CTk()
+    #Set GUI title
+    root.title("HEIC to jpg converter")
+    #Set GUI size to zoomed
+    root.after(1, lambda: root.state("zoomed"))
+    
     root.mainloop()
     
 
@@ -28,7 +33,7 @@ def folders(args):
         i += 1
     return directorylist
     
-def transform(directorylist):
+def convert(directorylist):
     for directory in directorylist:
         files = [f for f in os.listdir(directory) if f.lower().endswith('.heic') or f.lower().endswith('.heif')]
         if len(files) != 0:
@@ -65,7 +70,7 @@ def main():
     args = sys.argv[1]
     logging.basicConfig(filename="latest.log", level=logging.INFO, filemode='w',format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     directorylist = folders(args)
-    transform(directorylist)
+    convert(directorylist)
 
 if __name__ == "__main__":
     main()
