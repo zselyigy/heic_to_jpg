@@ -3,7 +3,18 @@ import subprocess
 import sys
 import zipfile as zip
 import logging
+import tkinter as tk
+import customtkinter as ctk
 
+def gui():
+    #Set the theme and color options
+    ctk.set_appearance_mode("dark")
+    ctk.set_default_color_theme("dark-blue")
+    
+    #Create root object
+    root = ctk.CTk()
+    root.mainloop()
+    
 
 def folders(args):
     i = 0
@@ -50,6 +61,7 @@ def transform(directorylist):
             zf.close()
 
 def main():
+    gui()
     args = sys.argv[1]
     logging.basicConfig(filename="latest.log", level=logging.INFO, filemode='w',format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     directorylist = folders(args)
