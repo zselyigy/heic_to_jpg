@@ -1,0 +1,6 @@
+*.jpg
+*.heic
+*.HEIC
+*.zip
+./.venv/
+latest.log
