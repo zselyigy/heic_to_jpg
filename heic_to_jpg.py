@@ -8,11 +8,30 @@ import customtkinter as ctk
 from tkinter import filedialog
 
 def gui():
+    """
+    Function to create a Graphical User Interface (GUI) for HEIC to jpg converter.
+
+    Global Variables:
+    - label: Tkinter label to display file or directory path.
+    - quall: Tkinter label to display quality setting.
+    - recc: Tkinter checkbox for running in all subdirectories.
+    - delc: Tkinter checkbox for deleting processed HEIC files.
+    - zipc: Tkinter checkbox for zipping processed HEIC files.
+    - modesw: Tkinter switch for toggling dark mode.
+    - quals: Tkinter slider to adjust quality of converted images.
+    - q: Default quality value set to 95.
+
+    Returns:
+    - None
+
+    Creates a GUI window using CTk library with buttons, checkboxes, switch, slider, and labels for various functionalities.
+    """
     global label, quall
     global recc, delc, zipc
     global modesw
     global quals
     global q
+    global root
     q = 95
     
     #Set the theme and color options
@@ -66,13 +85,36 @@ def gui():
     convfb.grid(row=1, column=4, sticky="we")
     modesw.select()
     quals.set(95)
-    label = ctk.CTkLabel(root, width=root.winfo_width(), text="File or directory path will appear here.", corner_radius=5, anchor="center", font=("Arial", 20))
+    label = ctk.CTkLabel(root, width=root.winfo_width(), text="File or directory path will appear here.", corner_radius=5, anchor="center", font=("Arial", 20), wraplength=340)
     quall = ctk.CTkLabel(root, text=f"Quality: {q}", corner_radius=5, font=("Arial", 20))
     quall.grid(row=2, column=4, sticky="we")
     label.grid(row=0, column=4, sticky= "we")
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
     
+def on_closing():
+    """
+    Function to handle the closing event of the application window.
+
+    Returns:
+    - None
+
+    Displays a confirmation dialog asking if the user wants to quit.
+    If the user confirms, it destroys the root window, closing the application.
+    """
+    if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
+        root.destroy() 
+    
 def change_mode():
+    """
+    Function to change the appearance mode of the GUI based on the state of the mode switch.
+
+    Returns:
+    - None
+
+    If the mode switch is toggled to dark mode, it sets the appearance mode to "dark" and updates the colors of the quality slider accordingly.
+    If the mode switch is toggled to light mode, it sets the appearance mode to "light" and updates the colors of the quality slider accordingly.
+    """
     if modesw.get():
         ctk.set_appearance_mode("dark")
         quals.configure(progress_color="#1f538d", button_color="#102a47")
@@ -81,29 +123,65 @@ def change_mode():
         quals.configure(progress_color="#4c75a4", button_color = "#1f538d")
 
 def quality(new):
+    """
+    Function to update the quality value based on the slider position.
+
+    Args:
+    - new: New value selected on the slider.
+
+    Global Variables:
+    - q: Quality value.
+
+    Returns:
+    - None
+
+    Updates the global quality value based on the new slider position, updates the quality label to display the new value, and prints the new value.
+    """
     global q
     q = int(new)
     quall.configure(text=f"Quality: {q}")
     print(q)
 
 def folders():
+    """
+    Function to recursively list all directories within a given directory.
+
+    Returns:
+    - directorylist: List of all directories within the specified directory.
+
+    Uses a breadth-first search algorithm to traverse all directories within the specified directory,
+    replaces backslashes with forward slashes in the directory path, and returns a list of all directories.
+    """
     i = 0
     directory = dirs.replace('\\', '/')
     directorylist = [directory]
     while i < len(directorylist):
         print(i)
-        szar = [f"{directorylist[i]}/{f}" for f in os.listdir(directorylist[i]) if os.path.isdir(f"{directorylist[i]}/{f}")]
-        for darab in szar:
-            directorylist.append(darab)
+        dir = [f"{directorylist[i]}/{f}" for f in os.listdir(directorylist[i]) if os.path.isdir(f"{directorylist[i]}/{f}")]
+        for darab in dir:
+            directorylist.append(dir)
         i += 1
     return directorylist
     
 def convert_rec(directorylist):
+    """
+    Function to recursively convert HEIC/HEIF files to JPG within a list of directories.
+
+    Args:
+    - directorylist: List of directories to search for HEIC/HEIF files.
+
+    Returns:
+    - None
+
+    Iterates over each directory in the directory list, identifies HEIC/HEIF files, and converts them to JPG format.
+    Additionally, it provides options to zip processed HEIC files and delete them after conversion.
+
+    """
     for directory in directorylist:
         files = [f for f in os.listdir(directory) if f.lower().endswith('.heic') or f.lower().endswith('.heif')]
         if len(files) != 0:
             for filename in files:
-                command = rf'.\.venv\Scripts\heif-convert.exe -o {filename[:-5]} -p "{directory}" -q {q} "{directory}/{filename}"'
+                command = rf'.\.venv\Scripts\heif-convert.exe -o "{filename[:-5]}" -p "{directory}" -q {q} "{directory}/{filename}"'
                 #
                 try:
                     subprocess.run(command, shell=True, check=True)
@@ -134,10 +212,22 @@ def convert_rec(directorylist):
                 
 
 def convert(directory):
+    """
+    Function to convert HEIC/HEIF files to JPG within a specified directory.
+
+    Args:
+    - directory: Directory path to search for HEIC/HEIF files.
+
+    Returns:
+    - None
+
+    Identifies HEIC/HEIF files within the specified directory and converts them to JPG format.
+    Additionally, it provides options to zip processed HEIC files and delete them after conversion.
+    """
     files = [f for f in os.listdir(directory) if f.lower().endswith('.heic') or f.lower().endswith('.heif')]
     if len(files) != 0:
         for filename in files:
-            command = rf'.\.venv\Scripts\heif-convert.exe -o {filename[:-5]} -p "{directory}" -q {q} "{directory}/{filename}"'
+            command = rf'.\.venv\Scripts\heif-convert.exe -o "{filename[:-5]}" -p "{directory}" -q {q} "{directory}/{filename}"'
             #
             try:
                 subprocess.run(command, shell=True, check=True)
@@ -165,9 +255,21 @@ def convert(directory):
             zf.close()
         if delc.get() == 1:
                 for file_to_write in files:
-                    os.remove(f"{directory}/{file_to_write}")
+                    os.remove(f"'{directory}/{file_to_write}'")
 def convert_f(file):
-    command = rf'.\.venv\Scripts\heif-convert.exe -o {file[:-5]} -p "{file}" -q {q} "{file}"'
+    """
+    Function to convert a single HEIC/HEIF file to JPG.
+
+    Args:
+    - file: Path of the HEIC/HEIF file to be converted.
+
+    Returns:
+    - None
+
+    Converts the specified HEIC/HEIF file to JPG format.
+    Additionally, it provides an option to delete the original file after conversion.
+    """
+    command = rf'.\.venv\Scripts\heif-convert.exe -o "{file[:-5]}" -p "{file}" -q {q} "{file}"'
     #
     try:
         subprocess.run(command, shell=True, check=True)
@@ -178,8 +280,21 @@ def convert_f(file):
         os.remove(f"{file}")
 
 def convert_fs(filelist):
+    """
+    Function to convert a list of HEIC/HEIF files to JPG.
+
+    Args:
+    - filelist: List of paths of HEIC/HEIF files to be converted.
+
+    Returns:
+    - None
+
+    Converts each HEIC/HEIF file in the list to JPG format.
+    Additionally, it provides options to zip processed HEIC files and delete them after conversion.
+    """
     for filename in filelist:
-        command = rf'.\.venv\Scripts\heif-convert.exe -o {filename[:-5]} -p "{os.path.dirname(filename)}" -q {q} "{filename}"'
+        command = rf'.\.venv\Scripts\heif-convert.exe -o "{filename[:-5]}" -p "{os.path.dirname(filename)}" -q {q} "{filename}"'
+        print(command)
         try:
             subprocess.run(command, shell=True, check=True)
             logging.info(f"{os.path.basename(filename)} ---> {os.path.basename(filename)}.jpg")
@@ -211,6 +326,16 @@ def convert_fs(filelist):
  
 
 def conversion():
+    """
+    Function to initiate the conversion process based on user input.
+
+    Returns:
+    - None
+
+    If no directory is specified, it checks if the input is a list of files or a single file and initiates the conversion accordingly.
+    If a directory is specified and the recursive checkbox is selected, it initiates recursive conversion within all subdirectories.
+    Otherwise, it initiates conversion within the specified directory.
+    """
     if dirs == "":
         if type(file) == list:
             convert_fs([f.name for f in file])
@@ -223,6 +348,16 @@ def conversion():
             convert(dirs)
         
 def get_file():
+    """
+    Function to open a file dialog for selecting a single HEIC file.
+
+    Returns:
+    - None
+
+    Opens a file dialog window to select a HEIC file.
+    Updates the global 'file' variable with the selected file object.
+    If a file is selected, it updates the label to display the selected file path.
+    """
     global file
     global dirs
     dirs = ""
@@ -233,6 +368,16 @@ def get_file():
     
 
 def get_directory():
+    """
+    Function to open a directory dialog for selecting a directory.
+
+    Returns:
+    - None
+
+    Opens a directory dialog window to select a directory.
+    Updates the global 'dirs' variable with the selected directory path.
+    If a directory is selected, it updates the label to display the selected directory path.
+    """
     global dirs
     global file
     file = ""
@@ -242,6 +387,16 @@ def get_directory():
         label.grid(row=0, column=4, sticky= "we")
     
 def get_files():
+    """
+    Function to open a file dialog for selecting multiple HEIC files.
+
+    Returns:
+    - None
+
+    Opens a file dialog window to select multiple HEIC files.
+    Updates the global 'file' variable with a list of selected file objects.
+    If files are selected, it updates the label to display the selected file paths.
+    """
     global file
     global dirs
     dirs = ""
@@ -251,6 +406,15 @@ def get_files():
         label.grid(row=0, column=4, sticky= "we")
     
 def main():
+    
+    """
+    Main function to start the HEIC to JPG converter application.
+
+    Returns:
+    - None
+
+    Configures logging settings, initializes the GUI, and starts the main event loop.
+    """
     logging.basicConfig(filename="latest.log", level=logging.INFO, filemode='w',format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     gui()
     
