@@ -50,31 +50,32 @@ def gui():
         root.columnconfigure(i, weight=1)
         root.rowconfigure(i, weight=1)
 
-    # creation of the button instances
-    db = ctk.CTkButton(master=root, text="Choose directory", command=get_directory, height=100, font=("Arial", 20))
-    fsb = ctk.CTkButton(master=root, text="Choose files", command=get_files, height=100, font=("Arial", 20))
-    convfb = ctk.CTkButton(master=root, text="Convert files/directory", command=conversion, height=100, font=("Arial", 20), fg_color='blue4')
-    recc = ctk.CTkCheckBox(master=root, text="Run in all subdirectories?", onvalue=True, offvalue=False,font=("Arial", 20))
-    delc = ctk.CTkCheckBox(master=root, text="Delete processed HEIC files?", onvalue=True, offvalue=False,font=("Arial", 20))
-    zipc = ctk.CTkCheckBox(master=root, text="Zip processed HEIC files?", onvalue=True, offvalue=False,font=("Arial", 20))
-    modesw = ctk.CTkSwitch(master=root, text="Dark mode", onvalue=True, offvalue=False, command=change_mode,font=("Arial", 20))
-    quals = ctk.CTkSlider(master=root, from_=1, to=100, command=quality, progress_color="#1f538d", number_of_steps=99, button_color="#102a47")
+    # creation of the screen element instances
 
     # file/directory selection buttons in the first line
-    fsb.grid(row=1, column=3, sticky="we")
-    db.grid(row=1, column=5, sticky="we")
+    db = ctk.CTkButton(master=root, text="Choose directory", command=get_directory, height=100, font=("Arial", 20))
+    fsb = ctk.CTkButton(master=root, text="Choose files", command=get_files, height=100, font=("Arial", 20))
+    fsb.grid(row=2, column=2, sticky="we")
+    db.grid(row=3, column=2, sticky="we")
 
     # dark mode selector in the left bottom corner
+    modesw = ctk.CTkSwitch(master=root, text="Dark mode", onvalue=True, offvalue=False, command=change_mode,font=("Arial", 20))
     modesw.grid(row=9, column=0, sticky="we")
+
+    # window label
+    label = ctk.CTkLabel(root, width=root.winfo_width(), text="File or directory path will appear here.", corner_radius=5, anchor="center", font=("Arial", 20), wraplength=340)
+    label.grid(row=0, column=4, sticky= "we")
 
     # quality selection and options in the middle column
     # quality selection
+    recc = ctk.CTkCheckBox(master=root, text="Run in all subdirectories?", onvalue=True, offvalue=False,font=("Arial", 20))
+    delc = ctk.CTkCheckBox(master=root, text="Delete processed HEIC files?", onvalue=True, offvalue=False,font=("Arial", 20))
+    zipc = ctk.CTkCheckBox(master=root, text="Zip processed HEIC files?", onvalue=True, offvalue=False,font=("Arial", 20))
+    quals = ctk.CTkSlider(master=root, from_=1, to=100, command=quality, progress_color="#1f538d", number_of_steps=99, button_color="#102a47")
     modesw.select()
     quals.set(95)
-    label = ctk.CTkLabel(root, width=root.winfo_width(), text="File or directory path will appear here.", corner_radius=5, anchor="center", font=("Arial", 20), wraplength=340)
     quall = ctk.CTkLabel(root, text=f"Quality: {q}", corner_radius=5, font=("Arial", 20))
     quall.grid(row=2, column=4, sticky="we")
-    label.grid(row=0, column=4, sticky= "we")
     # options
     quals.grid(row=3, column=4, sticky="we")
     recc.grid(row=4, column=4, sticky="we")
@@ -82,6 +83,7 @@ def gui():
     zipc.grid(row=6, column=4, sticky="we")
     
     # convert button in the middle bottom of the screen
+    convfb = ctk.CTkButton(master=root, text="Convert HEIC files to jpg", command=conversion, height=100, font=("Arial", 20), fg_color='blue4')
     convfb.grid(row=8, column=4, sticky="we")
     
     root.protocol("WM_DELETE_WINDOW", on_closing)
