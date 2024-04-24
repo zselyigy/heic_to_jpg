@@ -7,6 +7,8 @@ import tkinter as tk
 import customtkinter as ctk
 from tkinter import filedialog
 
+# TODO Create executable, https://customtkinter.tomschimansky.com/documentation/packaging
+
 def gui():
     """
     Function to create a Graphical User Interface (GUI) for HEIC to jpg converter.
@@ -68,27 +70,38 @@ def gui():
     fb = ctk.CTkButton(master=root, text="Choose file", command=get_file, height=100, font=("Arial", 20))
     db = ctk.CTkButton(master=root, text="Choose directory", command=get_directory, height=100, font=("Arial", 20))
     fsb = ctk.CTkButton(master=root, text="Choose files", command=get_files, height=100, font=("Arial", 20))
-    convfb = ctk.CTkButton(master=root, text="Convert files/directory", command=conversion, height=100, font=("Arial", 20))
+    convfb = ctk.CTkButton(master=root, text="Convert files/directory", command=conversion, height=100, font=("Arial", 20), fg_color='blue4')
     recc = ctk.CTkCheckBox(master=root, text="Run in all subdirectories?", onvalue=True, offvalue=False,font=("Arial", 20))
     delc = ctk.CTkCheckBox(master=root, text="Delete processed HEIC files?", onvalue=True, offvalue=False,font=("Arial", 20))
     zipc = ctk.CTkCheckBox(master=root, text="Zip processed HEIC files?", onvalue=True, offvalue=False,font=("Arial", 20))
     modesw = ctk.CTkSwitch(master=root, text="Dark mode", onvalue=True, offvalue=False, command=change_mode,font=("Arial", 20))
     quals = ctk.CTkSlider(master=root, from_=1, to=100, command=quality, progress_color="#1f538d", number_of_steps=99, button_color="#102a47")
-    quals.grid(row=3, column=4, sticky="we")
-    modesw.grid(row=9, column=0, sticky="we")
-    recc.grid(row=4, column=4, sticky="we")
-    delc.grid(row=5, column=4, sticky="we")
-    zipc.grid(row=6, column=4, sticky="we")
-    fb.grid(row=1, column=0, sticky="we")
-    fsb.grid(row=1, column=2, sticky="we")
+
+    # file/directory buttons in the first line
+    fb.grid(row=1, column=2, sticky="we")
+    fsb.grid(row=1, column=4, sticky="we")
     db.grid(row=1, column=6, sticky="we")
-    convfb.grid(row=1, column=4, sticky="we")
+
+    # dark mode selector in the left bottom corner
+    modesw.grid(row=9, column=0, sticky="we")
+
+    # quality selection and options in the middle column
+    # quality selection
     modesw.select()
     quals.set(95)
     label = ctk.CTkLabel(root, width=root.winfo_width(), text="File or directory path will appear here.", corner_radius=5, anchor="center", font=("Arial", 20), wraplength=340)
     quall = ctk.CTkLabel(root, text=f"Quality: {q}", corner_radius=5, font=("Arial", 20))
     quall.grid(row=2, column=4, sticky="we")
     label.grid(row=0, column=4, sticky= "we")
+    # options
+    quals.grid(row=3, column=4, sticky="we")
+    recc.grid(row=4, column=4, sticky="we")
+    delc.grid(row=5, column=4, sticky="we")
+    zipc.grid(row=6, column=4, sticky="we")
+    
+    # convert button in the middle bottom of the screen
+    convfb.grid(row=8, column=4, sticky="we")
+    
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
     
@@ -313,7 +326,7 @@ def convert_fs(filelist):
                 # Add file to the zip file
                 # first parameter file to zip, second filename in zip
                 zf.write(f"{os.path.basename(file_to_write)}", os.path.basename(file_to_write), compress_type=compression, compresslevel=0)
-
+# TODO fix the zipping error when space containing file names are used
             except FileNotFoundError as e:
                 print(f' *** Exception occurred during zip process - {e}')
         logging.info(f"HEIC files zipped")
