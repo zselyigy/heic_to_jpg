@@ -46,28 +46,11 @@ def gui():
     root.title("HEIC to jpg converter")
     #Set GUI size to zoomed
     root.after(1, lambda: root.state("zoomed"))
-    root.columnconfigure(0, weight=1)
-    root.columnconfigure(1, weight=1)
-    root.columnconfigure(2, weight=1)
-    root.columnconfigure(3, weight=1)
-    root.columnconfigure(4, weight=1)
-    root.columnconfigure(5, weight=1)
-    root.columnconfigure(6, weight=1)
-    root.columnconfigure(7, weight=1)
-    root.columnconfigure(8, weight=1)
-    root.columnconfigure(9, weight=1)
-    root.rowconfigure(0, weight=1)
-    root.rowconfigure(1, weight=1)
-    root.rowconfigure(2, weight=1)
-    root.rowconfigure(3, weight=1)
-    root.rowconfigure(4, weight=1)
-    root.rowconfigure(5, weight=1)
-    root.rowconfigure(6, weight=1)
-    root.rowconfigure(7, weight=1)
-    root.rowconfigure(8, weight=1)
-    root.rowconfigure(9, weight=1)
+    for i in range(0,10):
+        root.columnconfigure(i, weight=1)
+        root.rowconfigure(i, weight=1)
 
-    fb = ctk.CTkButton(master=root, text="Choose file", command=get_file, height=100, font=("Arial", 20))
+    # creation of the button instances
     db = ctk.CTkButton(master=root, text="Choose directory", command=get_directory, height=100, font=("Arial", 20))
     fsb = ctk.CTkButton(master=root, text="Choose files", command=get_files, height=100, font=("Arial", 20))
     convfb = ctk.CTkButton(master=root, text="Convert files/directory", command=conversion, height=100, font=("Arial", 20), fg_color='blue4')
@@ -77,10 +60,9 @@ def gui():
     modesw = ctk.CTkSwitch(master=root, text="Dark mode", onvalue=True, offvalue=False, command=change_mode,font=("Arial", 20))
     quals = ctk.CTkSlider(master=root, from_=1, to=100, command=quality, progress_color="#1f538d", number_of_steps=99, button_color="#102a47")
 
-    # file/directory buttons in the first line
-    fb.grid(row=1, column=2, sticky="we")
-    fsb.grid(row=1, column=4, sticky="we")
-    db.grid(row=1, column=6, sticky="we")
+    # file/directory selection buttons in the first line
+    fsb.grid(row=1, column=3, sticky="we")
+    db.grid(row=1, column=5, sticky="we")
 
     # dark mode selector in the left bottom corner
     modesw.grid(row=9, column=0, sticky="we")
@@ -360,26 +342,6 @@ def conversion():
         else:
             convert(dirs)
         
-def get_file():
-    """
-    Function to open a file dialog for selecting a single HEIC file.
-
-    Returns:
-    - None
-
-    Opens a file dialog window to select a HEIC file.
-    Updates the global 'file' variable with the selected file object.
-    If a file is selected, it updates the label to display the selected file path.
-    """
-    global file
-    global dirs
-    dirs = ""
-    file = filedialog.askopenfile(title="Select a HEIC file", filetypes=[("HEIC file","*.HEIC")])
-    if file != "":
-        label.configure(text=f"Selected file: {file.name}")
-        label.grid(row=0, column=4, sticky= "we")
-    
-
 def get_directory():
     """
     Function to open a directory dialog for selecting a directory.
