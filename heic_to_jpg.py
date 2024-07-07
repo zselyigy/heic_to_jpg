@@ -8,6 +8,11 @@ import customtkinter as ctk
 from tkinter import filedialog
 
 # TODO Create executable, https://customtkinter.tomschimansky.com/documentation/packaging
+# TODO integrate the move_jpg_date_directory.py to the graphical interface
+# TODO heic deletion doesn't work
+# TODO progress bar for conversion
+# TODO make buttons/checkboxes unavailable during conversion
+
 
 def gui():
     """
