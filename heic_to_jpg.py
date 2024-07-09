@@ -10,11 +10,12 @@ from tkinter import filedialog
 # TODO Create executable, https://customtkinter.tomschimansky.com/documentation/packaging
 # TODO integrate the move_jpg_date_directory.py to the graphical interface
 # TODO heic deletion doesn't work
-# TODO progress bar for conversion
+# TODO progress bar for conversion - DONE
 # TODO make buttons unavailable during conversion - DONE
 
 # collect the button instances to a list
 mybuttons = []
+myprogressbars = []
 
 def gui():
     """
@@ -96,6 +97,11 @@ def gui():
     convfb.grid(row=8, column=4, sticky="we")
     mybuttons.append(convfb)
     
+    progressbar = ctk.CTkProgressBar(master = root, width = 50, height = 50)
+    progressbar.grid(row=8, column=6, sticky= "we")
+    progressbar.set(0)
+    myprogressbars.append(progressbar)
+        
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
     
@@ -232,8 +238,9 @@ def convert(directory):
     Additionally, it provides options to zip processed HEIC files and delete them after conversion.
     """
     files = [f for f in os.listdir(directory) if f.lower().endswith('.heic') or f.lower().endswith('.heif')]
-    if len(files) != 0:
-        for filename in files:
+    no_files = len(files)
+    if no_files != 0:
+        for index, filename in enumerate(files):
             command = rf'.\.venv\Scripts\heif-convert.exe -o "{filename[:-5]}" -p "{directory}" -q {q} "{directory}/{filename}"'
             #
             try:
@@ -241,6 +248,8 @@ def convert(directory):
                 logging.info(f"{filename} ---> {filename[:-5]}.jpg ({directory})")
             except:
                 print(f"Error converting {filename}")
+            myprogressbars[0].set((index+1)/no_files)
+            root.update_idletasks()
 
         if zipc.get() == 1:
             # Select the compression mode ZIP_DEFLATED for compression
@@ -263,6 +272,11 @@ def convert(directory):
         if delc.get() == 1:
                 for file_to_write in files:
                     os.remove(f"'{directory}/{file_to_write}'")
+    
+    myprogressbars[0].set(0)
+                    
+                    
+                    
 def convert_f(file):
     """
     Function to convert a single HEIC/HEIF file to JPG.
@@ -346,7 +360,7 @@ def conversion():
     # make the buttons inactive while conversion is running
     for mybutton in mybuttons:
         mybutton['state'] = tk.DISABLED
-
+    
     if dirs == "":
         if type(file) == list:
             convert_fs([f.name for f in file])
@@ -361,7 +375,7 @@ def conversion():
     # make the buttons active when conversion finished
     for mybutton in mybuttons:
         mybutton['state'] = tk.DISABLED
-        
+
 
 def get_directory():
     """
