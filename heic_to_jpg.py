@@ -11,8 +11,10 @@ from tkinter import filedialog
 # TODO integrate the move_jpg_date_directory.py to the graphical interface
 # TODO heic deletion doesn't work
 # TODO progress bar for conversion
-# TODO make buttons/checkboxes unavailable during conversion
+# TODO make buttons unavailable during conversion - DONE
 
+# collect the button instances to a list
+mybuttons = []
 
 def gui():
     """
@@ -54,14 +56,16 @@ def gui():
     for i in range(0,10):
         root.columnconfigure(i, weight=1)
         root.rowconfigure(i, weight=1)
-
+    
     # creation of the screen element instances
-
+    
     # file/directory selection buttons in the first line
     db = ctk.CTkButton(master=root, text="Choose directory", command=get_directory, height=100, font=("Arial", 20))
     fsb = ctk.CTkButton(master=root, text="Choose files", command=get_files, height=100, font=("Arial", 20))
     fsb.grid(row=2, column=2, sticky="we")
     db.grid(row=3, column=2, sticky="we")
+    mybuttons.append(db)
+    mybuttons.append(fsb)
 
     # dark mode selector in the left bottom corner
     modesw = ctk.CTkSwitch(master=root, text="Dark mode", onvalue=True, offvalue=False, command=change_mode,font=("Arial", 20))
@@ -90,6 +94,7 @@ def gui():
     # convert button in the middle bottom of the screen
     convfb = ctk.CTkButton(master=root, text="Convert HEIC files to jpg", command=conversion, height=100, font=("Arial", 20), fg_color='blue4')
     convfb.grid(row=8, column=4, sticky="we")
+    mybuttons.append(convfb)
     
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
@@ -338,6 +343,10 @@ def conversion():
     If a directory is specified and the recursive checkbox is selected, it initiates recursive conversion within all subdirectories.
     Otherwise, it initiates conversion within the specified directory.
     """
+    # make the buttons inactive while conversion is running
+    for mybutton in mybuttons:
+        mybutton['state'] = tk.DISABLED
+
     if dirs == "":
         if type(file) == list:
             convert_fs([f.name for f in file])
@@ -348,7 +357,12 @@ def conversion():
             convert_rec(folders())
         else:
             convert(dirs)
+
+    # make the buttons active when conversion finished
+    for mybutton in mybuttons:
+        mybutton['state'] = tk.DISABLED
         
+
 def get_directory():
     """
     Function to open a directory dialog for selecting a directory.
